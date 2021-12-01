@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  aoc:
+    tty: true
+    build:
+      context: ./src
+      dockerfile: Dockerfile-dev
+    volumes:
+      - ./src:/var/apps
+      - vscode:/root/.vscode-server
+    restart: on-failure:5
+
+volumes:
+  vscode:

@@ -1,0 +1,18 @@
+FROM golang:1.17
+
+ENV TZ="Asia\Jakarta"
+
+RUN apt-get update && apt-get install time
+
+WORKDIR /var/apps
+
+ENV GO111MODULE=on
+
+RUN GO111MODULE=on go install golang.org/x/tools/gopls@latest
+RUN go install github.com/lukehoban/go-outline@latest
+RUN go install github.com/uudashr/gopkgs/v2/cmd/gopkgs@latest
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
+RUN go install honnef.co/go/tools/cmd/staticcheck@latest
+RUN GOBIN=/tmp/ go install github.com/go-delve/delve/cmd/dlv@master && mv /tmp/dlv $GOPATH/bin/dlv-dap
+
+CMD ["bash"]
