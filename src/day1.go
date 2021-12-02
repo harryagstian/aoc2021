@@ -1,12 +1,7 @@
 package main
 
-import (
-	"fmt"
-)
-
-func day1() {
-	// lines, _ := readLines("day1sample.txt")
-	lines, _ := readLines("day1.txt")
+func day1(day int, sample bool) {
+	lines := inputReaderWrapper(day, sample)
 
 	current := 0
 	increase := 0
@@ -22,7 +17,7 @@ func day1() {
 		}
 		current = new
 	}
-	fmt.Printf("%d\n", increase)
+	printSolution(increase)
 
 	// part 2
 	increase = 0
@@ -44,5 +39,5 @@ func day1() {
 		}
 		current = new
 	}
-	fmt.Printf("%d\n", increase)
+	printSolution(increase)
 }

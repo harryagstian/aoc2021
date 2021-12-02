@@ -1,13 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 )
 
-func day2() {
-	// lines, _ := readLines("day2sample.txt")
-	lines, _ := readLines("day2.txt")
+func day2(day int, sample bool) {
+	lines := inputReaderWrapper(day, sample)
 	location := []int{0, 0}
 	for _, v := range lines {
 		arr := strings.Split(v, " ")
@@ -25,7 +23,7 @@ func day2() {
 			location[0] = location[0] + length
 		}
 	}
-	fmt.Printf("%d\n", location[0]*location[1])
+	printSolution(location[0] * location[1])
 
 	aim := 0
 	location = []int{0, 0}
@@ -46,5 +44,5 @@ func day2() {
 			aim = aim + length
 		}
 	}
-	fmt.Printf("%d\n", location[0]*location[1])
+	printSolution(location[0] * location[1])
 }

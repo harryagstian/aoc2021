@@ -2,14 +2,20 @@ package main
 
 import (
 	"bufio"
+	"fmt"
+	"log"
 	"os"
+	"path"
 	"strconv"
 )
 
+var currentPart = 0
+
 // readLines reads a whole file into memory
 // and returns a slice of its lines.
-func readLines(path string) ([]string, error) {
-	file, err := os.Open(path)
+func readLines(filepath string) ([]string, error) {
+	file, err := os.Open(path.Join("inputs", filepath))
+
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +29,33 @@ func readLines(path string) ([]string, error) {
 	return lines, scanner.Err()
 }
 
+func inputReaderWrapper(day int, sample bool) []string {
+	sampleStr := "sample"
+
+	if !sample {
+		sampleStr = ""
+	}
+
+	lines, err := readLines(fmt.Sprintf("day%d%s.txt", day, sampleStr))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return lines
+}
+
 func stringToInteger(s string) int {
-	i, _ := strconv.Atoi(s)
+	i, err := strconv.Atoi(s)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	return i
+}
+
+func printSolution(value interface{}) {
+	fmt.Printf("Part %d: %v\n", currentPart, value)
+	currentPart = currentPart + 1
 }
