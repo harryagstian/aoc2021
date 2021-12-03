@@ -22,7 +22,7 @@ func day1(day int, sample bool) {
 	// part 2
 	increase = 0
 	current = 0
-	for index, _ := range lines {
+	for index := range lines {
 		if index > len(lines)-3 {
 			break
 		}

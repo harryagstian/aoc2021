@@ -20,6 +20,8 @@ func main() {
 		day1(*day, *sample)
 	case 2:
 		day2(*day, *sample)
+	case 3:
+		day3(*day, *sample)
 	default:
 		fmt.Println("No solution for this day yet")
 	}

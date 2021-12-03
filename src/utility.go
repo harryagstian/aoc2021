@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"strings"
 )
 
 var currentPart = 0
@@ -58,4 +59,8 @@ func stringToInteger(s string) int {
 func printSolution(value interface{}) {
 	fmt.Printf("Part %d: %v\n", currentPart, value)
 	currentPart = currentPart + 1
+}
+
+func arrayToString(a []int, delim string) string {
+	return strings.Trim(strings.Replace(fmt.Sprint(a), " ", delim, -1), "[]")
 }
