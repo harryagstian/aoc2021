@@ -4,6 +4,6 @@ RUN mkdir -p /var/apps
 
 WORKDIR /var/apps
 
-RUN npm install lodash
+RUN npm install lodash flags
 
 ENTRYPOINT ["/bin/bash"]
