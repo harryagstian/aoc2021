@@ -1,0 +1,9 @@
+FROM node:16
+
+RUN mkdir -p /var/apps
+
+WORKDIR /var/apps
+
+RUN npm install lodash
+
+ENTRYPOINT ["/bin/bash"]

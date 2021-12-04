@@ -64,3 +64,15 @@ func printSolution(value interface{}) {
 func arrayToString(a []int, delim string) string {
 	return strings.Trim(strings.Replace(fmt.Sprint(a), " ", delim, -1), "[]")
 }
+
+func sliceAtoi(sa []string) ([]int, error) {
+	si := make([]int, 0, len(sa))
+	for _, a := range sa {
+		i, err := strconv.Atoi(strings.TrimSpace(a))
+		if err != nil {
+			return si, err
+		}
+		si = append(si, i)
+	}
+	return si, nil
+}

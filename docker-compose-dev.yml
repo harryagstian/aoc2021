@@ -1,14 +1,25 @@
-version: "3.8"
+version: "3.3"
 services:
-  aoc:
+  go:
     tty: true
     build:
-      context: ./src
+      context: ./go/src
       dockerfile: Dockerfile-dev
     volumes:
-      - ./src:/var/apps
+      - ./go/src:/var/apps
+      - vscode:/root/.vscode-server
+    restart: on-failure:5
+  js:
+    tty: true
+    build:
+      context: ./js
+      dockerfile: Dockerfile-dev
+    volumes:
+      - node_modules:/var/apps/node_modules
+      - ./js:/var/apps
       - vscode:/root/.vscode-server
     restart: on-failure:5
 
 volumes:
   vscode:
+  node_modules:

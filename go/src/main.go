@@ -22,6 +22,9 @@ func main() {
 		day2(*day, *sample)
 	case 3:
 		day3(*day, *sample)
+	case 4:
+		// does not work
+		day4(*day, *sample)
 	default:
 		fmt.Println("No solution for this day yet")
 	}

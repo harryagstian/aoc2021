@@ -42,8 +42,8 @@ func day3(day int, sample bool) {
 		epsilonArray = append(epsilonArray, mostCommon)
 	}
 
-	gammaInt := convertArrIntToInt(gammaArray)
-	epsilonInt := convertArrIntToInt(epsilonArray)
+	gammaInt := convertBinaryArrIntToInt(gammaArray)
+	epsilonInt := convertBinaryArrIntToInt(epsilonArray)
 
 	printSolution(gammaInt * epsilonInt)
 
@@ -54,7 +54,7 @@ func day3(day int, sample bool) {
 		iter = iter + 1
 	}
 
-	O2Int := convertArrStrToInt(lines)
+	O2Int := convertBinaryArrStrToInt(lines)
 
 	iter = 0
 	lines = baseLines
@@ -62,7 +62,7 @@ func day3(day int, sample bool) {
 		lines = getOccurence(lines, iter, "CO2")
 		iter = iter + 1
 	}
-	CO2Int := convertArrStrToInt(lines)
+	CO2Int := convertBinaryArrStrToInt(lines)
 	printSolution(O2Int * CO2Int)
 }
 
@@ -96,12 +96,12 @@ func compare(zeros []string, ones []string, mode string) []string {
 	}
 }
 
-func convertArrStrToInt(arr []string) int64 {
+func convertBinaryArrStrToInt(arr []string) int64 {
 	val, _ := strconv.ParseInt(strings.Join(arr, ""), 2, 64)
 	return val
 }
 
-func convertArrIntToInt(arr []int) int64 {
+func convertBinaryArrIntToInt(arr []int) int64 {
 	val, _ := strconv.ParseInt(arrayToString(arr, ""), 2, 64)
 	return val
 }
