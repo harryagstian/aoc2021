@@ -2,24 +2,37 @@ const { readFromFile, printSolution } = require('./utility')
 const flags = require('flags')
 
 const solve = (sample) => {
-    const inputs = readFromFile(6, sample)
+    let inputs = readFromFile(6, sample)
+    
+    printSolution(iterateOver(inputs, 80))
+    printSolution(iterateOver(inputs, 256))
+}
 
-    let arr = inputs.split(",").map(Number)
-    console.log(arr)
-    for (let i = 0; i < 256; i++) {
-        const len = arr.length
-        for (let j = 0; j < len; j++) {
-            let current = arr[j] - 1
+const iterateOver = (inputs, day) => {
+    const maxDay = 9
+    let arr = Array(maxDay).fill(0)
 
-            if (current < 0) {
-                arr.push(8)
-                current = 6
-            }
-            arr[j] = current
-        }
+    for (const v of inputs.split(",").map(Number)) {
+        arr[v]++
     }
 
-    printSolution(arr.length)
+    for (let i = 0; i < day; i++) {
+        let newArr = []
+
+        for (j = 1; j < maxDay; j++) {
+            newArr.push(arr[j])
+        }
+
+        newArr.push(arr[0])
+        newArr[6] += arr[0]
+        arr = newArr
+    }
+
+    const solution = arr.reduce((prev, curr) => {
+        return prev + curr
+    }, 0)
+
+    return solution
 }
 
 flags.defineBoolean("sample", false, "run with sample")

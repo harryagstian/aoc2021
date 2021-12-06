@@ -1,7 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 
-const part = 1
+let part = 1
 
 const readFromFile = (day, sample = false) => {
     const filename = `${__dirname}/inputs/day${day}${(sample) ? 'sample' : ''}.txt`
@@ -13,6 +13,7 @@ const readFromFile = (day, sample = false) => {
 
 const printSolution = (anystr) => {
     console.log(`Part ${part} solution: ${anystr}`)
+    part++
 }
 
 module.exports = {
