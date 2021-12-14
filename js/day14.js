@@ -8,8 +8,9 @@ const solve = (sample) => {
     const inputs = readFromFile(14, sample).split("\n")
     const pairs = {}
 
-    let polymer = []
-    let occurence = {}
+    let polymer = {}
+    const occurence = {}
+
     for (let line of inputs) {
         if (line === "") {
             phase++
@@ -17,7 +18,16 @@ const solve = (sample) => {
         }
 
         if (phase === 0) {
-            polymer = line.split("")
+            for (let i = 0; i < line.length - 1; i++) {
+                const current = line[i]
+                const next = line[i + 1]
+                const key = createKey(current, next)
+
+                checkAndAddOccurence(polymer, key, 1)
+                checkAndAddOccurence(occurence, current, 1)
+            }
+
+            checkAndAddOccurence(occurence, line[line.length - 1], 1)
         } else {
             const [key, result] = line.split(" -> ")
 
@@ -25,39 +35,45 @@ const solve = (sample) => {
         }
     }
 
-    for (let i = 0; i < 10; i++) {
-        const newPolymer = []
-        const newOccurence = {}
-        for (let j = 0; j < polymer.length - 1; j++) {
-            const current = polymer[j]
-            const next = polymer[j + 1]
-            const key = createKey(current, next)
+    for (let i = 0; i < 40; i++) {
+        let newPolymer = {}
 
-            newPolymer.push(current)
-            checkAndAddOccurence(newOccurence, current)
+        for (let [k, v] of Object.entries(polymer)) {
+            let derivative = pairs[k]
 
-            if (pairs[key]) {
-                newPolymer.push(pairs[key])
-                checkAndAddOccurence(newOccurence, pairs[key])
+            if (!derivative) {
+                continue
             }
 
+            let new1 = `${k[0]}${derivative}`
+            let new2 = `${derivative}${k[1]}`
+
+            checkAndAddOccurence(newPolymer, new1, v)
+            checkAndAddOccurence(newPolymer, new2, v)
+
+            checkAndAddOccurence(occurence, derivative, v) // we only need to keep track how many of each atom (?) exist. when new derivative atom is created, just +1 to the counter. thanks reddit (/r/adventofcode/comments/rg2odo/) for the enlightment
         }
-        newPolymer.push(polymer[polymer.length - 1])
-        checkAndAddOccurence(newOccurence, polymer[polymer.length - 1])
+
         polymer = newPolymer
-        occurence = newOccurence
+
+        if (i === 9) {
+            const values = _.sortBy(Object.values(occurence))
+
+            printSolution(Math.abs(values[0] - values[values.length - 1]))
+        }
     }
+
     const values = _.sortBy(Object.values(occurence))
 
     printSolution(Math.abs(values[0] - values[values.length - 1]))
 }
 
-const checkAndAddOccurence = (obj, v) => {
-    if (!obj[v]) {
-        obj[v] = 0
+const checkAndAddOccurence = (obj, k, v = 1) => {
+    if (!obj[k]) {
+        obj[k] = 0
     }
 
-    obj[v]++
+    obj[k] += v
 }
 
 const createKey = (a, b) => {
