@@ -27,10 +27,6 @@ const binaryParser = (binary) => {
     const version = binaryToHex(binary.splice(0, 3))
     const typeId = binaryToHex(binary.splice(0, 3))
 
-    if (isNaN(typeId)) {
-        return { len: 6, value: 0 }
-    }
-
     part1 += Number(hexToDec(version))
 
     if (typeId == 4) {
@@ -50,14 +46,14 @@ const binaryParser = (binary) => {
     } else {
         const lenTypeId = binary.shift()
         const subpacketValue = []
-        let totalLen = 6
+        let totalLen = 6 + 1
 
         if (lenTypeId == 0) {
             let subpacketLen = Number(binaryToDec(binary.splice(0, 15)))
             totalLen += 15
             totalLen += subpacketLen
             // bits at the end are extra due to the hexadecimal representation and should be ignored.
-            while (subpacketLen > 6) { 
+            while (subpacketLen > 0) { 
                 const { len, value } = binaryParser(binary)
                 subpacketLen -= len
                 subpacketValue.push(Number(value))
