@@ -3,14 +3,6 @@ const flags = require('flags')
 require("util").inspect.defaultOptions.depth = null;
 const _ = require('lodash')
 
-const logWrapper = (item) => {
-    const debug = true
-
-    if (debug) {
-        console.log(item)
-    }
-}
-
 let globalTree = {}
 let actionTaken = 0
 let canSplit = true
@@ -30,7 +22,7 @@ const solve = (sample) => {
 
                 snailfishReducer(0, [], "explode")
                 snailfishReducer(0, [], "split")
-                
+
                 if (t === actionTaken) {
                     break
                 } else {
@@ -40,10 +32,45 @@ const solve = (sample) => {
         }
     }
 
-    // console.log({ output: JSON.stringify(treeToArray(globalTree)) })
     printSolution(getMagnitude(globalTree))
+
+    let maxSum = 0
+    for (let i = 0; i < inputs.length; i++) {
+        for (let j = 0; j < inputs.length; j++) {
+            if (i === j) {
+                continue
+            }
+            let line1 = inputs[i]
+            let line2 = inputs[j]
+
+            globalTree = {
+                x: arrayToTree(eval(line1)),
+                y: arrayToTree(eval(line2))
+            }
+
+            let t = actionTaken
+            while (true) {
+                canSplit = true
+
+                snailfishReducer(0, [], "explode")
+                snailfishReducer(0, [], "split")
+
+                if (t === actionTaken) {
+                    break
+                } else {
+                    t = actionTaken
+                }
+            }
+
+            let sum = getMagnitude(globalTree)
+            maxSum = Math.max(sum, maxSum)
+        }
+    }
+
+    printSolution(maxSum)
 }
 
+// convert object to array
 const treeToArray = (tree) => {
     let { x, y } = tree
     if (typeof x === "object") {
@@ -56,6 +83,7 @@ const treeToArray = (tree) => {
     return [x, y]
 }
 
+// convert array to object
 const arrayToTree = (arr) => {
     const tree = {}
 
@@ -78,71 +106,63 @@ const arrayToTree = (arr) => {
 
 const snailfishReducer = (depth, key = [], mode) => {
     let { x, y } = getPropByString(globalTree, key.join("."))
+
+    // traverse left most first
     if (typeof x === "object") {
         let clone = _.cloneDeep(key)
         clone.push("x")
         snailfishReducer(depth + 1, clone, mode)
     }
-    // explode
 
+    // explode
     if (depth === 4 && mode === "explode") {
-        // console.log("before", mode, globalTreeToJSON())
         let tempKey = _.cloneDeep(key)
         const currentSide = tempKey.pop()
         const parentTree = getPropByString(globalTree, tempKey.join("."))
 
         parentTree[currentSide] = "?"
-        // console.log("during", mode, globalTreeToJSON())
         let jsonString = JSON.stringify(treeToArray(globalTree))
-        // console.log({ a: parentTree[currentSide], currentSide, jsonString })
+        // get first number after question mark
         let rightRule = /(.*"\?".*?)(\d+)(.*)/g
+        // get first number before question mark
         let leftRule = /(.*)(\W)(\d+)(.*"\?".*)(.*)/g
 
         let res = leftRule.exec(jsonString)
         if (res !== null) {
+            // addition to first number before question mark
             let newStr = res[1] + res[2] + String(Number(res[3]) + x) + res[4] + res[5]
-            // console.log({ jsonString, newStr, res })
             jsonString = newStr
         }
 
         let res2 = rightRule.exec(jsonString)
 
         if (res2 !== null) {
+            // addition to first number after question mark
             let newStr = res2[1] + String(Number(res2[2]) + y) + res2[3]
             jsonString = newStr
         }
 
         jsonString = jsonString.replace(/"\?"/, "0")
-        // console.log({ jsonString, res, x, y, depth })
         globalTree = arrayToTree(JSON.parse(jsonString))
-        // console.log({ globalTree, jsonString })
-        // console.log("after", mode, globalTreeToJSON())
     } else if (canSplit && mode === "split") {
-        // console.log({ x, y, key: "asdasdasd" })
         if (x >= 10) {
             let base = x / 2
             let tempKey = _.cloneDeep(key)
-            // const currentSide = tempKey.pop()
             const parentTree = getPropByString(globalTree, tempKey.join("."))
-            // console.log("before", mode, globalTreeToJSON(), x, base, parentTree)
             parentTree.x = { x: Math.floor(base), y: Math.ceil(base) }
-            // console.log("after", mode, globalTreeToJSON(), parentTree)
             actionTaken++
             canSplit = false
-            doneForNow = true
         } else if (y >= 10) {
             let base = y / 2
             let tempKey = _.cloneDeep(key)
-            // const currentSide = tempKey.pop()
             const parentTree = getPropByString(globalTree, tempKey.join("."))
             parentTree.y = { x: Math.floor(base), y: Math.ceil(base) }
             actionTaken++
             canSplit = false
-            doneForNow = true
         }
-        // console.log({ a: JSON.stringify(treeToArray(globalTree)) })
     }
 
+    // traverse to y
     if (typeof y === "object") {
         let clone = _.cloneDeep(key)
         clone.push("y")
@@ -157,7 +177,6 @@ const getPropByString = (obj, propString) => {
     let prop, props = propString.split('.');
     let i = 0
 
-
     for (let iLen = props.length - 1; i < iLen; i++) {
         prop = props[i];
 
@@ -171,7 +190,15 @@ const getPropByString = (obj, propString) => {
     return obj[props[i]];
 }
 
+let dp = {}
+
 const getMagnitude = (tree) => {
+    let key = JSON.stringify(tree)
+
+    if (dp[key]) {
+        return dp[key]
+    }
+
     let { x, y } = tree
 
 
@@ -183,12 +210,13 @@ const getMagnitude = (tree) => {
         y = getMagnitude(y)
     }
 
-
-
-    return (3 * x) + (2 * y)
+    let ans = (3 * x) + (2 * y)
+    dp[key] = ans
+    return ans
 }
 
 const globalTreeToJSON = () => {
+    // for debugging
     return JSON.stringify(treeToArray(globalTree))
 }
 
