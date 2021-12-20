@@ -2,6 +2,7 @@ const { readFromFile, printSolution } = require('./utility')
 const flags = require('flags')
 const assert = require('assert')
 require("util").inspect.defaultOptions.depth = null;
+const _ = require('lodash')
 
 /*
     resources
@@ -70,15 +71,68 @@ const solve = (sample) => {
                 }
             }
 
-            console.log({ key, arr })
+            // console.log({ key, arr })
         }
     }
 
+    console.log({possibleMatch})
     let fixed = new Set() // these scanners should not be rotated
 
     // try 0 and 1 first
 
-    temp(scanners, beacons)
+    let candidates = getCandidates(scanners, beacons)
+    // console.log(candidates)
+
+    // let possibleState = []
+    // for (let i = 0; i < 24; i++) {
+    //     possibleState.push(i)
+    // }
+
+    let matches = new Set()
+
+    for (let candidate of candidates) {
+        let possibleState = []
+        for (let i = 0; i < 24; i++) {
+            possibleState.push(i)
+        }
+        // console.log({candidate, possibleState})
+        let first = candidate[0].split(".")
+        let second = candidate[1].split(".")
+
+        let scanner1 = scanners[first[0]]
+        // let cp = _.cloneDeep(scanners[second[0]])
+        let scanner2 = scanners[second[0]]
+
+        let state = possibleState.shift()
+        let distance1 = getXYZDistance(scanner1[first[1]], scanner1[first[2]])
+
+        while (true) {
+            if (state === undefined) {
+                console.log(`No match ${first} ${second}`)
+                break
+            }
+            let copy = combination(scanner2, state)
+            let distance2 = getXYZDistance(copy[second[1]], copy[second[2]])
+            let isMatch = matchXYZDistance(distance1, distance2)
+
+            // console.log({ first, second, distance1, distance2, state })
+            if (!isMatch) {
+                // combination(scanner2, state)
+                state = possibleState.shift()
+                continue
+            }
+
+            matches.add([first, second, state])
+
+            break
+
+        }
+        // scanners[second[0]] = scanner2
+
+        // return
+    }
+
+    console.log(matches, matches.size)
 
 
 
@@ -97,7 +151,22 @@ const solve = (sample) => {
     // printSolution(inputs)
 }
 
-const getDistance = (arr1, arr2) => {
+const matchXYZDistance = (arr1, arr2) => createKey(arr1) === createKey(arr2)
+
+const getXYZDistance = (arr1, arr2) => {
+    let distance = []
+
+    for (let i = 0; i < arr1.length; i++) {
+        const v1 = arr1[i]
+        const v2 = arr2[i]
+
+        distance.push(v1 - v2)
+    }
+
+    return distance
+}
+
+const getStraigthDistance = (arr1, arr2) => {
     let sum = 0
 
     for (let i = 0; i < arr1.length; i++) {
@@ -108,6 +177,71 @@ const getDistance = (arr1, arr2) => {
     }
 
     return Math.sqrt(sum)
+}
+
+const sequenceGenerator = () => {
+    // https://stackoverflow.com/a/16467849
+    const roll = (v) => [v[0], v[2], -v[1]]
+    const turn = (v) => [-v[1], v[0], v[2]]
+
+    const sequence = (v) => {
+        let result = new Set()
+        for (let i = 0; i < 2; i++) {
+            for (let j = 0; j < 3; j++) {
+                v = roll(v)
+                result.add(v)
+                for (let k = 0; k < 3; k++) {
+                    v = turn(v)
+                    result.add(v)
+                }
+            }
+            v = roll(turn(roll(v)))
+        }
+
+        return result
+    }
+
+    let res = sequence(1, 2, 3)
+}
+
+const combination = (scanner, state) => {
+    // generated from sequenceGenerator
+    // for given array [x, y, z], it can turn into all these different values
+    let copy = _.cloneDeep(scanner)
+
+    const COMBINATION_MATRIX = [
+        (x, y, z) => [x * -1, y * -1, z],
+        (x, y, z) => [x * -1, z * -1, y * -1],
+        (x, y, z) => [x * -1, y, z * -1],
+        (x, y, z) => [x * -1, z, y],
+        (x, y, z) => [y * -1, x * -1, z * -1],
+        (x, y, z) => [y * -1, z * -1, x],
+        (x, y, z) => [y * -1, x, z],
+        (x, y, z) => [y * -1, z, x * -1],
+        (x, y, z) => [z * -1, x * -1, y],
+        (x, y, z) => [z * -1, y * -1, x * -1],
+        (x, y, z) => [z * -1, x, y * -1],
+        (x, y, z) => [z * -1, y, x],
+        (x, y, z) => [x, y * -1, z * -1],
+        (x, y, z) => [x, z * -1, y],
+        (x, y, z) => [x, y, z],
+        (x, y, z) => [x, z, y * -1],
+        (x, y, z) => [y, x * -1, z],
+        (x, y, z) => [y, z * -1, x * -1],
+        (x, y, z) => [y, x, z * -1],
+        (x, y, z) => [y, z, x],
+        (x, y, z) => [z, x * -1, y * -1],
+        (x, y, z) => [z, y * -1, x],
+        (x, y, z) => [z, x, y],
+        (x, y, z) => [z, y, x * -1]
+    ]
+
+    for (let [key, value] of Object.entries(copy)) {
+        let [x, y, z] = value
+        copy[key] = COMBINATION_MATRIX[state](x, y, z)
+    }
+
+    return copy
 }
 
 const rotate = (axis, angle, values) => {
@@ -148,7 +282,6 @@ const rotate = (axis, angle, values) => {
 
     let newValues = []
 
-
     for (let i = 0; i < 3; i++) {
         let m = matrix[i]
         let sum = 0
@@ -163,10 +296,9 @@ const rotate = (axis, angle, values) => {
     return newValues
 }
 
-const temp = (scanners, beacons) => {
-    let id1 = 0
-    let id2 = 1
-
+const getCandidates = (scanners, beacons) => {
+    let id1 = 3
+    let id2 = 4
 
     let possibleMatch = []
     Object.values(beacons).forEach((e) => {
@@ -174,7 +306,6 @@ const temp = (scanners, beacons) => {
             let arr = []
             Array.from(e).forEach(v => {
                 let t = Number(v.split(".").shift())
-                console.log(t)
 
                 if (t === id1 || t === id2) {
                     arr.push(v)
@@ -187,9 +318,15 @@ const temp = (scanners, beacons) => {
         }
     })
 
-    console.log({ a: scanners["0"], b: scanners["1"] })
-    console.log({ possibleMatch })
+    // console.log({ a: scanners["0"], b: scanners["1"] })
+    // console.log({ possibleMatch })
 
+    return possibleMatch
+
+    // possibleMatch
+    // maybe get 4 beacons per scanner - try check whether the translation works?
+    // scan1.beacon1 [x,y,z] - scan2.beacon1 [x,y,z] = scan1.beacon2 [x,y,z] - scan2.beacon2 [x,y,z]
+    // if it doesnt match, rotate scan2
 }
 
 const getDifferences = (scanners, scannerId, beacons) => {
@@ -205,13 +342,13 @@ const getDifferences = (scanners, scannerId, beacons) => {
                 continue
             }
 
-            const distance = getDistance(scanners[scannerId][baseKey], scanners[scannerId][compareKey])
+            const distance = getStraigthDistance(scanners[scannerId][baseKey], scanners[scannerId][compareKey])
 
             if (!beacons[distance]) {
                 beacons[distance] = new Set()
             }
 
-
+            // scannerId x, distance of beacon n to beacon m = distance
             beacons[distance].add([scannerId, ...temp].join("."))
         }
     }
@@ -260,10 +397,15 @@ const getDifferences = (scanners) => {
     return difference
 }
  */
-const createKey = (x, y) => `${x}.${y}`
+const createKey = (...rest) => rest.join(".")
 
-flags.defineBoolean("sample", false, "run with sample")
-flags.defineBoolean("s", false, "run with sample")
-flags.parse()
+// flags.defineBoolean("sample", false, "run with sample")
+// flags.defineBoolean("s", false, "run with sample")
+// flags.parse()
 
-solve(flags.get("sample") || flags.get("s"))
+// solve(flags.get("sample") || flags.get("s"))
+
+let sample = true
+// let sample = false
+
+solve(sample)
